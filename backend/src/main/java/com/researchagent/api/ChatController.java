@@ -2,6 +2,7 @@ package com.researchagent.api;
 
 import com.researchagent.api.dto.ChatRequest;
 import com.researchagent.api.dto.ErrorResponse;
+import com.researchagent.service.SessionService;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -16,9 +17,11 @@ import java.util.Map;
 public class ChatController {
 
     private final ChatClient chatClient;
+    private final SessionService sessionService;
 
-    public ChatController(ChatClient chatClient) {
+    public ChatController(ChatClient chatClient, SessionService sessionService) {
         this.chatClient = chatClient;
+        this.sessionService = sessionService;
     }
 
     @GetMapping("/health")
@@ -31,6 +34,11 @@ public class ChatController {
         if (request.getMessage() == null || request.getMessage().trim().isEmpty()) {
             ErrorResponse errorResponse = new ErrorResponse("INVALID_REQUEST", "消息内容不能为空");
             return Flux.just("event: error\n", "data: " + errorResponse.toJson() + "\n\n");
+        }
+
+        // 更新会话消息计数
+        if (request.getSessionId() != null && !request.getSessionId().trim().isEmpty()) {
+            sessionService.incrementMessageCount(request.getSessionId());
         }
 
         try {

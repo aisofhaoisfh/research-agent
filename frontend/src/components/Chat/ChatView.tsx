@@ -4,16 +4,29 @@ import { MessageList } from './MessageList';
 import { ChatInput } from './ChatInput';
 import '../../styles/chat.css';
 
-export function ChatView() {
-  const { messages, isLoading, error, sendMessage } = useChat();
+interface ChatViewProps {
+  sessionId?: string;
+}
+
+export function ChatView({ sessionId }: ChatViewProps) {
+  const { messages, isLoading, error, sendMessage, clearMessages } = useChat();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const prevSessionIdRef = useRef<string | undefined>();
+
+  // 当会话切换时，清空消息
+  useEffect(() => {
+    if (prevSessionIdRef.current !== sessionId) {
+      clearMessages();
+      prevSessionIdRef.current = sessionId;
+    }
+  }, [sessionId, clearMessages]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   const handleSend = (content: string) => {
-    sendMessage(content);
+    sendMessage(content, sessionId);
   };
 
   const quickAsks = [
@@ -44,8 +57,15 @@ export function ChatView() {
         )}
         <MessageList messages={messages} />
         {error && (
-          <div style={{ color: 'var(--danger)', padding: '12px', background: 'var(--bg-card)', borderRadius: '8px' }}>
-            错误: {error}
+          <div className="error-message">
+            <span className="error-icon">⚠️</span>
+            <span className="error-text">{error}</span>
+            <button 
+              className="error-retry-btn"
+              onClick={() => window.location.reload()}
+            >
+              刷新页面
+            </button>
           </div>
         )}
         <div ref={messagesEndRef} />

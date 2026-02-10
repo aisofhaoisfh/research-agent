@@ -1,11 +1,14 @@
 import { useState } from 'react';
 import { Sidebar } from './Sidebar';
 import { MainArea } from './MainArea';
+import { useSessions } from '../../hooks/useSessions';
 
 interface LayoutProps {
   children: React.ReactNode;
   currentView: string;
   onViewChange: (view: string) => void;
+  currentSessionId?: string;
+  onSessionChange?: (sessionId: string | undefined) => void;
 }
 
 const VIEW_TITLES: Record<string, { title: string; subtitle?: string }> = {
@@ -19,26 +22,50 @@ const VIEW_TITLES: Record<string, { title: string; subtitle?: string }> = {
   contract: { title: '合同智检', subtitle: '合同检查' },
 };
 
-export function Layout({ children, currentView, onViewChange }: LayoutProps) {
-  const [historyItems, setHistoryItems] = useState<Array<{ id: string; title: string }>>([
-    { id: '1', title: '本月销售凭证与金蝶差异' },
-    { id: '2', title: '下午客流少的原因分析' },
-  ]);
+export function Layout({ 
+  children, 
+  currentView, 
+  onViewChange,
+  currentSessionId,
+  onSessionChange,
+}: LayoutProps) {
+  const { sessions, createNewSession, removeSession } = useSessions();
 
-  const handleCreateChat = () => {
-    onViewChange('chat');
+  const handleCreateChat = async () => {
+    try {
+      const newSession = await createNewSession();
+      onSessionChange?.(newSession.id);
+      onViewChange('chat');
+    } catch (error) {
+      console.error('创建会话失败:', error);
+      // 即使创建失败，也切换到对话视图
+      onViewChange('chat');
+    }
   };
 
   const handleHistoryClick = (id: string) => {
+    onSessionChange?.(id);
     onViewChange('chat');
-    // TODO: 加载对应会话
   };
 
-  const handleHistoryDelete = (id: string) => {
-    setHistoryItems((prev) => prev.filter((item) => item.id !== id));
+  const handleHistoryDelete = async (id: string) => {
+    try {
+      await removeSession(id);
+      if (currentSessionId === id) {
+        onSessionChange?.(undefined);
+      }
+    } catch (error) {
+      console.error('删除会话失败:', error);
+    }
   };
 
   const viewInfo = VIEW_TITLES[currentView] || { title: currentView };
+
+  // 将会话转换为历史项格式
+  const historyItems = sessions.map((s) => ({
+    id: s.id,
+    title: s.title,
+  }));
 
   return (
     <div className="app">

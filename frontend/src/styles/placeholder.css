@@ -1,0 +1,40 @@
+.placeholder-view {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 24px;
+}
+
+.placeholder-content {
+  background: var(--bg-card);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  padding: 48px;
+  text-align: center;
+}
+
+.placeholder-content h2 {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--text-primary);
+}
+
+.placeholder-content > p {
+  font-size: 16px;
+  color: var(--text-secondary);
+  margin-bottom: 32px;
+}
+
+.placeholder-note {
+  margin-top: 32px;
+  padding: 24px;
+  background: var(--bg-elevated);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.placeholder-note p {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin: 0;
+}
