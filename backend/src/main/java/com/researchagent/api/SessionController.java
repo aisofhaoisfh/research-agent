@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/v1/sessions")
@@ -37,10 +38,13 @@ public class SessionController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getSession(@PathVariable String id) {
-        return sessionService.getSession(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(new ErrorResponse("NOT_FOUND", "会话不存在")));
+        Optional<SessionResponse> session = sessionService.getSession(id);
+        if (session.isPresent()) {
+            return ResponseEntity.ok(session.get());
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ErrorResponse("NOT_FOUND", "会话不存在"));
+        }
     }
 
     @DeleteMapping("/{id}")
@@ -56,9 +60,12 @@ public class SessionController {
     @PatchMapping("/{id}")
     public ResponseEntity<?> updateSession(@PathVariable String id, @RequestBody SessionRequest request) {
         sessionService.updateSession(id, request != null ? request.getTitle() : null);
-        return sessionService.getSession(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(new ErrorResponse("NOT_FOUND", "会话不存在")));
+        Optional<SessionResponse> session = sessionService.getSession(id);
+        if (session.isPresent()) {
+            return ResponseEntity.ok(session.get());
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ErrorResponse("NOT_FOUND", "会话不存在"));
+        }
     }
 }

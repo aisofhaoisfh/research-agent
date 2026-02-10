@@ -39,10 +39,8 @@ public class ChatClientConfig {
                     回答要简洁明了，重点突出，便于门店管理者快速理解和决策。
                     """)
                 .defaultFunctions(
-                    List.of(
-                        storeSummaryTool.getStoreSummary(),
-                        financeDiffTool.getFinanceDiff()
-                    )
+                    storeSummaryTool.getStoreSummary(),
+                    financeDiffTool.getFinanceDiff()
                 )
                 .build();
     }
