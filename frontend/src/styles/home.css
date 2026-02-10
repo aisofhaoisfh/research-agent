@@ -1,0 +1,102 @@
+.home-view {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.home-welcome-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 32px;
+  padding: 20px;
+  background: var(--bg-card);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+.home-welcome-greeting {
+  flex: 1;
+}
+
+.home-greeting-line1 {
+  display: block;
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.home-greeting-name {
+  color: var(--accent);
+}
+
+.home-greeting-line2 {
+  display: block;
+  font-size: 16px;
+  color: var(--text-secondary);
+}
+
+.home-welcome-divider {
+  color: var(--text-muted);
+  font-size: 20px;
+}
+
+.home-welcome-date {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.home-guide-layout {
+  margin-top: 32px;
+}
+
+.home-guide-panel {
+  background: var(--bg-card);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  padding: 24px;
+}
+
+.home-guide-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 24px;
+}
+
+.home-guide-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.home-guide-item {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.home-guide-num {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--accent-dim);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.home-guide-content h4 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.home-guide-content p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
