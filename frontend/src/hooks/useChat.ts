@@ -49,6 +49,7 @@ export function useChat() {
             if (text.startsWith('"') && text.endsWith('"')) {
               text = JSON.parse(text);
             }
+            // 累积内容（流式更新）
             fullContent = text;
             setMessages((prev) =>
               prev.map((msg) =>
@@ -56,7 +57,7 @@ export function useChat() {
               )
             );
           } catch (e) {
-            // 如果不是 JSON，直接使用原始数据
+            // 如果不是 JSON，累积原始数据
             fullContent += event.data;
             setMessages((prev) =>
               prev.map((msg) =>
