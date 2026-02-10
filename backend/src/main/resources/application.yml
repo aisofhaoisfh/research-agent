@@ -7,10 +7,11 @@ spring:
   
   ai:
     openai:
-      api-key: ${OPENAI_API_KEY:}
+      api-key: ${OPENAI_API_KEY:sk-ef97432b10f64e0e8401639744c71073}
+      base-url: ${OPENAI_BASE_URL:https://api.deepseek.com/v1}
       chat:
         options:
-          model: gpt-4o-mini
+          model: ${OPENAI_MODEL:deepseek-chat}
           temperature: 0.7
 
 logging:
