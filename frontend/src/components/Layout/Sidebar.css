@@ -1,0 +1,21 @@
+.nav-section-content {
+  padding-left: 20px;
+}
+
+.nav-sublabel {
+  font-size: 12px;
+  color: var(--text-muted);
+  padding: 8px 20px 4px 40px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.nav-item-sub {
+  padding-left: 40px;
+}
+
+.chevron {
+  float: right;
+  font-size: 10px;
+  color: var(--text-muted);
+}

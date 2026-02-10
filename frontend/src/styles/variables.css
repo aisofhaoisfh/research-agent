@@ -1,0 +1,36 @@
+:root {
+  --bg-main: #0f1419;
+  --bg-card: #1a2332;
+  --bg-elevated: #243044;
+  --accent: #00c896;
+  --accent-dim: rgba(0, 200, 150, 0.15);
+  --accent-soft: #00e6a8;
+  --text-primary: #f0f4f8;
+  --text-secondary: #8b9cb3;
+  --text-muted: #5c6b7e;
+  --border: rgba(139, 156, 179, 0.12);
+  --danger: #ff6b6b;
+  --warning: #ffb347;
+  --success: #00c896;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: 'DM Sans', -apple-system, sans-serif;
+  background: var(--bg-main);
+  color: var(--text-primary);
+}
+
+#root {
+  height: 100%;
+}
