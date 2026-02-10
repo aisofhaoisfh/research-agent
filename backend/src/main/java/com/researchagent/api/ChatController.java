@@ -2,6 +2,7 @@ package com.researchagent.api;
 
 import com.researchagent.api.dto.ChatRequest;
 import com.researchagent.api.dto.ErrorResponse;
+import com.researchagent.api.dto.MessageDto;
 import com.researchagent.service.SessionService;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.http.MediaType;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 @RestController
 @RequestMapping("/v1")
@@ -36,21 +38,43 @@ public class ChatController {
             return Flux.just("event: error\n", "data: " + errorResponse.toJson() + "\n\n");
         }
 
-        // 更新会话消息计数
-        if (request.getSessionId() != null && !request.getSessionId().trim().isEmpty()) {
-            sessionService.incrementMessageCount(request.getSessionId());
+        String sessionId = request.getSessionId();
+        String userMessage = request.getMessage();
+
+        // 保存用户消息
+        if (sessionId != null && !sessionId.trim().isEmpty()) {
+            MessageDto userMsg = new MessageDto();
+            userMsg.setRole("user");
+            userMsg.setContent(userMessage);
+            sessionService.addMessage(sessionId, userMsg);
         }
 
         try {
+            AtomicReference<StringBuilder> assistantContentRef = new AtomicReference<>(new StringBuilder());
+            
             return chatClient.prompt()
-                    .user(request.getMessage())
+                    .user(userMessage)
                     .stream()
                     .content()
+                    .doOnNext(content -> {
+                        // 累积助手回复内容
+                        assistantContentRef.get().append(content);
+                    })
                     .map(content -> {
                         // SSE 格式：event: message\ndata: {content}\n\n
                         return "event: message\n" + "data: " + escapeJson(content) + "\n\n";
                     })
-                    .concatWith(Flux.just("event: done\n", "data: {}\n\n"))
+                    .concatWith(Flux.defer(() -> {
+                        // 流结束后保存助手消息
+                        String fullContent = assistantContentRef.get().toString();
+                        if (sessionId != null && !sessionId.trim().isEmpty() && !fullContent.isEmpty()) {
+                            MessageDto assistantMsg = new MessageDto();
+                            assistantMsg.setRole("assistant");
+                            assistantMsg.setContent(fullContent);
+                            sessionService.addMessage(sessionId, assistantMsg);
+                        }
+                        return Flux.just("event: done\n", "data: {}\n\n");
+                    }))
                     .onErrorResume(error -> {
                         ErrorResponse errorResponse = new ErrorResponse(
                             "CHAT_ERROR",

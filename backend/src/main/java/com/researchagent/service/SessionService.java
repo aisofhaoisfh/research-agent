@@ -1,5 +1,6 @@
 package com.researchagent.service;
 
+import com.researchagent.api.dto.MessageDto;
 import com.researchagent.api.dto.SessionResponse;
 import org.springframework.stereotype.Service;
 
@@ -62,6 +63,48 @@ public class SessionService {
         }
     }
 
+    public void addMessage(String sessionId, MessageDto message) {
+        SessionData session = sessions.get(sessionId);
+        if (session != null) {
+            if (session.messages == null) {
+                session.messages = new ArrayList<>();
+            }
+            message.setId(UUID.randomUUID().toString());
+            message.setTimestamp(LocalDateTime.now());
+            session.messages.add(message);
+            session.messageCount = session.messages.size();
+            session.updatedAt = LocalDateTime.now();
+            
+            // 自动生成会话标题（第一条用户消息）
+            if (session.messages.size() == 1 && "user".equals(message.getRole())) {
+                String title = message.getContent();
+                if (title.length() > 30) {
+                    title = title.substring(0, 30) + "...";
+                }
+                session.title = title;
+            }
+        }
+    }
+
+    public List<MessageDto> getMessages(String sessionId) {
+        SessionData session = sessions.get(sessionId);
+        if (session != null && session.messages != null) {
+            return new ArrayList<>(session.messages);
+        }
+        return new ArrayList<>();
+    }
+
+    public void clearMessages(String sessionId) {
+        SessionData session = sessions.get(sessionId);
+        if (session != null) {
+            if (session.messages != null) {
+                session.messages.clear();
+            }
+            session.messageCount = 0;
+            session.updatedAt = LocalDateTime.now();
+        }
+    }
+
     private SessionResponse toResponse(SessionData session) {
         return new SessionResponse(
                 session.id,
@@ -78,5 +121,6 @@ public class SessionService {
         LocalDateTime createdAt;
         LocalDateTime updatedAt;
         int messageCount;
+        List<MessageDto> messages;
     }
 }

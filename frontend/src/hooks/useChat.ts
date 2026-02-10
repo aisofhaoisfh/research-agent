@@ -1,5 +1,6 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { streamChat, SSEEvent } from '../api/chat';
+import { getMessages, Message as ApiMessage } from '../api/message';
 
 export interface Message {
   id: string;
@@ -8,12 +9,40 @@ export interface Message {
   timestamp: Date;
 }
 
-export function useChat() {
+export function useChat(sessionId?: string) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const sendMessage = useCallback(async (content: string, sessionId?: string) => {
+  // 加载消息历史
+  useEffect(() => {
+    if (sessionId) {
+      setIsLoadingHistory(true);
+      setError(null);
+      getMessages(sessionId)
+        .then((apiMessages) => {
+          const convertedMessages: Message[] = apiMessages.map((msg) => ({
+            id: msg.id,
+            role: msg.role,
+            content: msg.content,
+            timestamp: new Date(msg.timestamp),
+          }));
+          setMessages(convertedMessages);
+        })
+        .catch((err) => {
+          setError(err instanceof Error ? err.message : '加载消息历史失败');
+          setMessages([]);
+        })
+        .finally(() => {
+          setIsLoadingHistory(false);
+        });
+    } else {
+      setMessages([]);
+    }
+  }, [sessionId]);
+
+  const sendMessage = useCallback(async (content: string, currentSessionId?: string) => {
     if (!content.trim() || isLoading) return;
 
     // 添加用户消息
@@ -41,7 +70,7 @@ export function useChat() {
     try {
       let fullContent = '';
 
-      for await (const event of streamChat({ message: content, sessionId })) {
+      for await (const event of streamChat({ message: content, sessionId: currentSessionId || sessionId })) {
         if (event.type === 'message') {
           try {
             // 尝试解析 JSON（可能是转义的字符串）
@@ -95,6 +124,7 @@ export function useChat() {
   return {
     messages,
     isLoading,
+    isLoadingHistory,
     error,
     sendMessage,
     clearMessages,

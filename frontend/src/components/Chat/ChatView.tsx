@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useChat, Message } from '../../hooks/useChat';
 import { MessageList } from './MessageList';
 import { ChatInput } from './ChatInput';
+import { LoadingSpinner } from '../LoadingSpinner';
 import '../../styles/chat.css';
 
 interface ChatViewProps {
@@ -9,17 +10,8 @@ interface ChatViewProps {
 }
 
 export function ChatView({ sessionId }: ChatViewProps) {
-  const { messages, isLoading, error, sendMessage, clearMessages } = useChat();
+  const { messages, isLoading, isLoadingHistory, error, sendMessage } = useChat(sessionId);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const prevSessionIdRef = useRef<string | undefined>();
-
-  // 当会话切换时，清空消息
-  useEffect(() => {
-    if (prevSessionIdRef.current !== sessionId) {
-      clearMessages();
-      prevSessionIdRef.current = sessionId;
-    }
-  }, [sessionId, clearMessages]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -39,7 +31,10 @@ export function ChatView({ sessionId }: ChatViewProps) {
   return (
     <div className="chat-view">
       <div className="chat-messages">
-        {messages.length === 0 && (
+        {isLoadingHistory && (
+          <LoadingSpinner size="large" text="加载消息历史..." />
+        )}
+        {!isLoadingHistory && messages.length === 0 && (
           <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '40px' }}>
             <p>开始与智能助手对话吧</p>
             <div className="quick-ask" style={{ marginTop: '20px', justifyContent: 'center' }}>
@@ -55,7 +50,7 @@ export function ChatView({ sessionId }: ChatViewProps) {
             </div>
           </div>
         )}
-        <MessageList messages={messages} />
+        {!isLoadingHistory && <MessageList messages={messages} />}
         {error && (
           <div className="error-message">
             <span className="error-icon">⚠️</span>

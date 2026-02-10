@@ -1,4 +1,4 @@
-import { useState, KeyboardEvent } from 'react';
+import { useState, KeyboardEvent, useEffect, useRef } from 'react';
 
 interface ChatInputProps {
   onSend: (message: string) => void;
@@ -7,11 +7,23 @@ interface ChatInputProps {
 
 export function ChatInput({ onSend, isLoading }: ChatInputProps) {
   const [input, setInput] = useState('');
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // 自动调整高度
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`;
+    }
+  }, [input]);
 
   const handleSend = () => {
     if (input.trim() && !isLoading) {
       onSend(input);
       setInput('');
+      if (textareaRef.current) {
+        textareaRef.current.style.height = 'auto';
+      }
     }
   };
 
@@ -26,6 +38,7 @@ export function ChatInput({ onSend, isLoading }: ChatInputProps) {
     <div className="chat-input-area">
       <div className="chat-input-wrapper">
         <textarea
+          ref={textareaRef}
           className="chat-input"
           value={input}
           onChange={(e) => setInput(e.target.value)}
